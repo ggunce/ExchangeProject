@@ -1,0 +1,37 @@
+const Queue = require('bull');
+const REDIS_URL = 'redis://127.0.0.1:6379';
+const TransactionService = require('../services/transactionService');
+
+const queueOpts = {
+    limiter: {
+        max: 100,
+        duration: 10000
+    },
+    prefix: 'TRANSACTION-TASK', 
+    defaultJobOptions: { 
+        attempts: 3, 
+        removeOnComplete: true
+    }
+};
+
+class QueueHandler {
+    constructor() {
+        this.queue = new Queue('Transaction Queue', REDIS_URL, queueOpts);
+    
+        // consumer
+        this.queue.process('transactions', async (transaction, done) => {
+            console.log('processing transaction task');
+            await TransactionService.execute(transaction);
+            done();
+        })
+    }
+    
+    // producer
+    async addTransactionToQueue(transaction) {
+        await this.queue.add('transactions', transaction);
+        console.log('transactions added to the queue...');
+    }
+};
+
+module.exports = new QueueHandler();
+

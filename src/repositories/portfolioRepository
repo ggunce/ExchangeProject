@@ -1,0 +1,16 @@
+const Portfolio = require('../../sequelize/models').Portfolio
+
+module.exports = class PortfolioRepository {
+
+    async getPortfolioByClient(userId) {
+        return Portfolio.findAll({where: { userId: userId }});
+    };
+
+    async create(userId, share, amount = 0) {
+        return Portfolio.create(userId, share, amount);
+    };
+
+    async update(userId, share, amount) {
+        return Portfolio.update({ amount: amount }, {where: { userId: userId, share: share }});
+    };
+}

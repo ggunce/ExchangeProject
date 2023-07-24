@@ -1,0 +1,11 @@
+const container = require('../../src/container');
+const PortfolioRepository = container.resolve('PortfolioRepository');
+
+const execute = async (transaction) => {
+    let {share, client, finalAmount} = transaction.data;
+    await PortfolioRepository.update(client, share, finalAmount);
+    await transaction.moveToCompleted('done', true);
+
+};
+
+module.exports = { execute }

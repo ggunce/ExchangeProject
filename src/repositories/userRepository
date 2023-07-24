@@ -1,0 +1,12 @@
+const User = require('../../sequelize/models').User
+
+module.exports = class UserRepository {
+
+    async getUserByName(name) {
+        return User.findOne({where: { name: name }});
+    };
+
+    async create(name) {
+        return User.create(name);
+    };
+}

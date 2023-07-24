@@ -1,0 +1,21 @@
+
+const ShareDoesntValidError = "share doesnt valid";
+const ShareCreatedSuccessfully = "share created successfully";
+const ShareUpdatedSuccessfully = "share updated successfully";
+const UserCreatedSuccessfully = "user created successfully";
+const TransactionDoesntValid = "transaction doesnt valid";
+const UserDosentHavePortfolio = "user dosent have a portfolio";
+const InvalidRequestForPortfolio = "request doesnt valid for user portfolio";
+const InvalidTransactionType = "Invalid transaction type";
+
+module.exports = {
+    ShareDoesntValidError,
+    ShareCreatedSuccessfully,
+    ShareUpdatedSuccessfully,
+    UserCreatedSuccessfully,
+    TransactionDoesntValid,
+    UserDosentHavePortfolio,
+    InvalidRequestForPortfolio,
+    InvalidTransactionType,
+}
+

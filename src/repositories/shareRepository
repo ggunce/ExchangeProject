@@ -1,0 +1,20 @@
+const Share = require('../../sequelize/models').Share
+
+module.exports = class ShareRepository {
+
+    async getShareByName(name) {
+        return Share.findOne({where: { name: name }});
+    };
+
+    async create(name, amount) {
+        return Share.create(name, amount);
+    };
+
+    async bulkCreate(shares) {
+        return Share.bulkCreate(shares);
+    };
+
+    async update(amount, name) {
+        return Share.update({ amount }, {where: { name }});
+    };
+}

@@ -1,0 +1,63 @@
+const { ShareDoesntValidError, ShareCreatedSuccessfully, ShareUpdatedSuccessfully } = require('../messages/messages')
+const container = require('../../src/container');
+
+class ShareController {
+
+    constructor() {
+        this.ShareRepository = container.resolve('ShareRepository');
+    }
+
+    async getShareByName(req, res) {
+        let name = req.params.name;
+        return await this.ShareRepository.getShareByName(name).then((share) => {
+            return res.status(200).json({share})
+        }).catch(err => {
+            return res.status(400).json({err})
+        });
+    }
+
+    async createShare(req, res) {
+        let { name, amount } = req.body
+        await this.ShareRepository.create({ name, amount }).then((share) => {
+            return res.status(201).json({
+                "message": ShareCreatedSuccessfully,
+                share
+            })
+        }).catch(err => {
+            return res.status(400).json({err})
+        });
+     }
+
+     async bulkCreateShare(req, res) {
+        let { shares } = req.body
+        await this.ShareRepository.bulkCreate(shares).then((share) => {
+            return res.status(201).json({
+                "message": ShareCreatedSuccessfully,
+                share
+            })
+        }).catch(err => {
+            return res.status(400).json({err})
+        });
+     }
+
+     async updateShareAmount(req, res) {
+        let { name, amount } = req.body
+        const share = await this.ShareRepository.getShareByName(name)
+        if(share != null) {
+            await this.ShareRepository.update(amount, name).then(async () => {
+                return res.status(201).json({
+                    "message": ShareUpdatedSuccessfully,
+                    "name": name,
+                    "amount": amount
+                })
+            }).catch(err => {
+                return res.status(400).json({err})
+            });
+        } else {
+            return res.status(400).json({"message": ShareDoesntValidError});
+        }
+     }
+}
+
+module.exports = new ShareController();
+

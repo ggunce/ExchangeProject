@@ -1,0 +1,8 @@
+const constants = {
+    TRANSACTION_TYPES: {
+        BUY: "BUY",
+        SELL: "SELL"
+    }
+}
+
+module.exports = constants

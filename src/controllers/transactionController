@@ -1,0 +1,63 @@
+
+const QueueHandler = require('../handlers/queueHandler')
+const { TransactionDoesntValid, ShareDoesntValidError, UserDosentHavePortfolio, InvalidRequestForPortfolio, InvalidTransactionType } = require('../messages/messages')
+const { TRANSACTION_TYPES } = require('../constants')
+const container = require('../../src/container');
+
+class TransactionController {
+
+    constructor() {
+        this.ShareRepository = container.resolve('ShareRepository');
+        this.PortfolioRepository = container.resolve('PortfolioRepository');
+    }
+
+    async validateTransaction (transaction) {
+        let {type, share, client, amount} = transaction;
+        if(type === null || share === null || client === null || amount === null || amount < 0) {
+            throw new Error(TransactionDoesntValid)
+        }
+        //is share valid
+        const shareFromDb = await this.ShareRepository.getShareByName(share);
+        if(shareFromDb === null) {
+            throw new Error(ShareDoesntValidError)
+        }
+        //is client has portfolio
+        const portfolio = await this.PortfolioRepository.getPortfolioByClient(client);
+        if(portfolio === null) {
+            throw new Error(UserDosentHavePortfolio)
+        }
+
+        let finalAmount;
+        const sharePortfolio = portfolio.find(p => p.share === share);
+        const amountForTransaction = shareFromDb.amount * amount;
+        if(type === TRANSACTION_TYPES.SELL) {
+            //is client has this share / is amount enough in portfolio
+            if(sharePortfolio === null || sharePortfolio.amount < amountForTransaction) {
+                throw new Error(InvalidRequestForPortfolio)
+            }
+            finalAmount = Number(sharePortfolio.amount) - amountForTransaction;
+
+        } else if(type === TRANSACTION_TYPES.BUY) {
+            finalAmount = Number(sharePortfolio.amount) + amountForTransaction;
+        } else {
+            throw new Error(InvalidTransactionType)
+        }
+        return {
+            share,
+            client,
+            finalAmount
+        }
+    }
+    
+    async execute(req, res) {
+        let { transaction } = req.body;
+        await this.validateTransaction(transaction)
+        .then(async(res) => 
+            await QueueHandler.addTransactionToQueue(res))
+        .catch(err => {
+            return res.status(400).json({"error": err.message})
+        });
+    }
+}
+
+module.exports = new TransactionController();
